@@ -1,0 +1,892 @@
+\documentclass[12pt,a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{mdframed}
+\usepackage{microtype}
+\usepackage{parskip}
+
+% ── Page geometry ─────────────────────────────────────────────────────────────
+\geometry{
+  top=2.5cm, bottom=2.5cm,
+  left=2.8cm, right=2.8cm,
+  headheight=14pt
+}
+
+% ── Colours ───────────────────────────────────────────────────────────────────
+\definecolor{primary}{RGB}{30,90,160}
+\definecolor{accent}{RGB}{220,60,30}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{darkgray}{RGB}{80,80,80}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codepurple}{RGB}{128,0,128}
+\definecolor{codegray}{RGB}{120,120,120}
+\definecolor{backcolour}{RGB}{248,248,248}
+\definecolor{successgreen}{RGB}{34,139,34}
+\definecolor{warnorange}{RGB}{220,100,0}
+
+% ── Section styles ────────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}[\titlerule]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{primary!80!black}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{darkgray}}
+  {\thesubsubsection}{1em}{}
+
+% ── Code listings ─────────────────────────────────────────────────────────────
+\lstdefinestyle{pythonstyle}{
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen}\itshape,
+  keywordstyle=\color{primary}\bfseries,
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  frame=single,
+  rulecolor=\color{primary!30}
+}
+\lstset{style=pythonstyle}
+
+% ── Fancy boxes ───────────────────────────────────────────────────────────────
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{resultbox}[1][]{
+  enhanced,
+  colback=primary!5,
+  colframe=primary,
+  fonttitle=\bfseries,
+  title={#1},
+  breakable
+}
+
+\newtcolorbox{warnbox}[1][]{
+  enhanced,
+  colback=warnorange!10,
+  colframe=warnorange,
+  fonttitle=\bfseries,
+  title={#1},
+  breakable
+}
+
+\newtcolorbox{successbox}[1][]{
+  enhanced,
+  colback=successgreen!8,
+  colframe=successgreen,
+  fonttitle=\bfseries,
+  title={#1},
+  breakable
+}
+
+% ── Header / Footer ───────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgray} Analyse Comportementale Clientèle Retail}
+\fancyhead[R]{\small\color{darkgray} Machine Learning — GI2S1}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ── Hyperref ─────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=primary,
+  citecolor=primary,
+  urlcolor=accent,
+  pdftitle={Rapport ML Retail — Analyse Comportementale Clientèle},
+  pdfauthor={Module Machine Learning — GI2S1 MolkaChaoui}
+}
+
+% ── Misc ──────────────────────────────────────────────────────────────────────
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{6pt}
+
+% ==============================================================================
+\begin{document}
+% ==============================================================================
+
+% ── Title page ────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+
+  {\color{primary}\rule{\linewidth}{2pt}}
+  \vspace{0.5cm}
+
+  {\Huge\bfseries\color{primary}
+    Analyse Comportementale\\[0.3em]
+    Clientèle Retail}
+
+  \vspace{0.4cm}
+  {\color{primary}\rule{\linewidth}{0.8pt}}
+
+  \vspace{0.8cm}
+  {\LARGE\bfseries Rapport de Projet Machine Learning}
+
+  \vspace{1.2cm}
+
+  \begin{tcolorbox}[
+    enhanced, width=0.85\linewidth,
+    colback=lightgray,
+    colframe=primary,
+    fontupper=\large
+  ]
+  \centering
+  Système complet de Machine Learning pour la \textbf{rétention client},
+  la \textbf{segmentation comportementale} et la \textbf{prévision des dépenses}
+  — déployé via une application Flask.
+  \end{tcolorbox}
+
+  \vspace{1.5cm}
+
+  
+
+  \vspace{1.8cm}
+
+  \begin{tabular}{ccc}
+    \begin{tcolorbox}[width=3.5cm,colback=successgreen!15,colframe=successgreen,halign=center]
+      \textbf{AUC-ROC}\\[2pt]
+      {\Large\bfseries\color{successgreen} 0.958}\\
+      {\small Classification}
+    \end{tcolorbox}
+    &
+    \begin{tcolorbox}[width=3.5cm,colback=primary!15,colframe=primary,halign=center]
+      \textbf{Silhouette}\\[2pt]
+      {\Large\bfseries\color{primary} 0.228}\\
+      {\small Clustering}
+    \end{tcolorbox}
+    &
+    \begin{tcolorbox}[width=3.5cm,colback=warnorange!15,colframe=warnorange,halign=center]
+      \textbf{R²}\\[2pt]
+      {\Large\bfseries\color{warnorange} 0.668}\\
+      {\small Régression}
+    \end{tcolorbox}
+  \end{tabular}
+
+  \vfill
+  {\color{primary}\rule{\linewidth}{1.5pt}}
+  \vspace{0.3cm}
+  {\small\color{darkgray} Atelier Machine Learning — Analyse Comportementale Clientèle Retail (UK)}
+\end{titlepage}
+
+% ── Table of Contents ────────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ==============================================================================
+\section{Introduction et Vue d'Ensemble}
+% ==============================================================================
+
+\subsection{Contexte du Projet}
+
+Ce projet s'inscrit dans le cadre du module \textbf{Machine Learning — GI2S1} et vise à
+concevoir un pipeline bout-en-bout d'analyse comportementale pour une entreprise de retail
+e-commerce basée au Royaume-Uni. La compréhension fine du comportement client est aujourd'hui
+un enjeu stratégique majeur : identifier les clients à risque de départ (\textit{churn}),
+segmenter la base client et estimer la valeur monétaire future permettent d'orienter
+les actions marketing et d'optimiser le chiffre d'affaires.
+
+Le système développé répond à \textbf{trois questions métier critiques} :
+
+\begin{enumerate}[label=\textbf{Q\arabic*.}]
+  \item \textbf{Ce client va-t-il partir ?} — Prédiction du churn via un modèle de classification.
+  \item \textbf{À quel segment appartient-il ?} — Segmentation non supervisée par clustering.
+  \item \textbf{Combien va-t-il dépenser ?} — Estimation de la valeur client par régression.
+\end{enumerate}
+
+\subsection{Résumé des Performances}
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif des performances des trois modèles}
+\begin{tabular}{llll}
+\toprule
+\textbf{Question} & \textbf{Modèle} & \textbf{Métrique clé} & \textbf{Valeur} \\
+\midrule
+Prédiction churn & Random Forest + SMOTE & AUC-ROC & \textbf{0.958} \\
+                 &                        & F1-Score & \textbf{0.87} \\
+\midrule
+Segmentation     & KMeans ($k=4$)         & Silhouette Score & \textbf{0.228} \\
+                 &                        & Davies-Bouldin   & 1.30 \\
+\midrule
+Prévision valeur & Régression Linéaire    & $R^2$ & \textbf{0.668} \\
+                 &                        & MAE   & 864 £ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture Générale du Projet}
+
+Le projet est organisé selon la structure suivante :
+
+\begin{mdframed}[backgroundcolor=lightgray, linecolor=primary, linewidth=1pt]
+\begin{verbatim}
+projet_ml_retail/
+├── data/
+│   ├── raw/        # Données brutes (CSV source)
+│   ├── processed/  # Données après prétraitement
+│   └── train_test/ # Données de train/test splittées
+├── src/
+│   ├── preprocessing.py   # Pipeline nettoyage (6 étapes)
+│   ├── train_model.py     # Entraînement des 3 modèles
+│   ├── predict.py         # Inférence sur nouvelles données
+│   └── utils.py           # Fonctions utilitaires
+├── app/
+│   ├── app.py             # Application Flask
+│   └── templates/         # Interface HTML/Bootstrap
+├── notebooks/             # Analyses exploratoires (5 notebooks)
+└── requirements.txt
+\end{verbatim}
+\end{mdframed}
+
+% ==============================================================================
+\section{Données et Analyse Exploratoire}
+% ==============================================================================
+
+\subsection{Description du Dataset}
+
+Le jeu de données comprend \textbf{4\,372 clients} issus d'une plateforme e-commerce britannique,
+décrits par \textbf{52 features initiales} couvrant plusieurs dimensions comportementales :
+
+\begin{itemize}
+  \item \textbf{Données démographiques} : âge, genre, pays, région.
+  \item \textbf{Comportement d'achat (RFM)} : récence, fréquence, montant total (\textit{MonetaryTotal}).
+  \item \textbf{Préférences} : saison favorite, mois préféré, heure préférée, mode de paiement.
+  \item \textbf{Service client} : tickets support, score de satisfaction (1--5).
+  \item \textbf{Features dérivées} : panier moyen (\textit{AvgBasketValue}), ratio de retour,
+        délai moyen entre achats, ratio d'achat le week-end.
+  \item \textbf{Variable cible} : \textit{Churn} — variable binaire (0 = fidèle, 1 = parti).
+\end{itemize}
+
+\subsection{Distribution de la Variable Cible}
+
+La distribution du churn présente un \textbf{déséquilibre modéré} :
+
+\begin{table}[H]
+\centering
+\caption{Distribution de la variable cible Churn}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Classe} & \textbf{Effectif} & \textbf{Proportion} \\
+\midrule
+Churn = 0 (fidèle) & 2\,918 & 66.7\% \\
+Churn = 1 (parti)  & 1\,454 & 33.3\% \\
+\midrule
+\textbf{Total}     & \textbf{4\,372} & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ce déséquilibre (ratio 2:1) nécessite des stratégies de rééquilibrage pour éviter que le modèle
+ne soit biaisé vers la classe majoritaire. La technique \textbf{SMOTE} (\textit{Synthetic Minority
+Over-sampling Technique}) combinée à \texttt{class\_weight='balanced'} a été retenue.
+
+\subsection{Analyse des Corrélations et Fuite de Données}
+
+L'analyse exploratoire a révélé que plusieurs features présentaient des corrélations anormalement
+élevées avec la variable cible, indiquant une \textbf{fuite de données} (voir Section~\ref{sec:leakage}).
+
+% ==============================================================================
+\section{Prétraitement des Données}
+% ==============================================================================
+
+\subsection{Pipeline de Nettoyage (6 Étapes)}
+
+Le module \texttt{preprocessing.py} applique un pipeline structuré en 6 étapes séquentielles :
+
+\begin{enumerate}[label=\textbf{Étape \arabic*.}]
+
+  \item \textbf{Suppression des features à variance nulle} \\
+  Élimination automatique des colonnes constantes qui n'apportent aucune information discriminante.
+
+  \item \textbf{Correction des valeurs aberrantes codées} \\
+  Remplacement par \texttt{NaN} des codes invalides identifiés dans les données sources :
+  \begin{itemize}
+    \item \texttt{SupportTicketsCount} : valeurs $-1$ et $999$
+    \item \texttt{SatisfactionScore} : valeurs $-1$ et $99$
+    \item \texttt{Age} : valeurs $-1$ et $999$
+  \end{itemize}
+
+  \item \textbf{Traitement des dates d'inscription} \\
+  La feature \texttt{RegistrationDate} est décomposée en 4 features temporelles :
+  ancienneté en jours, mois d'inscription, trimestre, indicateur de week-end.
+
+  \item \textbf{Feature engineering sur les adresses IP} \\
+  Extraction de features réseau à partir de \texttt{LastLoginIP} (classe réseau, plage d'adresses).
+
+  \item \textbf{Création de features comportementales dérivées} \\
+  Calcul de \texttt{AvgBasketValue}, \texttt{ReturnRatio}, \texttt{CancelRate},
+  \texttt{AvgDaysBetweenPurchases}, \texttt{WeekendPurchaseRatio}, etc.
+
+  \item \textbf{Encodage des variables catégorielles} \\
+  Trois stratégies combinées :
+  \begin{itemize}
+    \item \textbf{Encodage ordinal} : \texttt{AgeCategory}, \texttt{LoyaltyLevel},
+          \texttt{ChurnRiskCategory}, \texttt{BasketSizeCategory}, \texttt{PreferredTimeOfDay}
+    \item \textbf{One-Hot Encoding} : \texttt{RFMSegment}, \texttt{CustomerType},
+          \texttt{FavoriteSeason}, \texttt{Region}, \texttt{Gender}, etc.
+    \item \textbf{Encodage binaire} : \texttt{NewsletterSubscribed}
+  \end{itemize}
+\end{enumerate}
+
+Le résultat est un DataFrame de \textbf{87 features} (contre 52 initiales) après encodage.
+
+\subsection{Gestion des Valeurs Manquantes}
+
+L'imputation est intégrée \textbf{directement dans les pipelines scikit-learn} via
+\texttt{KNNImputer(n\_neighbors=5)}, ce qui garantit que les statistiques d'imputation
+sont calculées uniquement sur les données d'entraînement et appliquées aux données de test
+— évitant ainsi une fuite d'information lors de l'imputation.
+
+\subsection{Gestion du Déséquilibre de Classes}
+
+\begin{table}[H]
+\centering
+\caption{Stratégies adoptées pour le déséquilibre}
+\begin{tabular}{ll}
+\toprule
+\textbf{Technique} & \textbf{Paramètre} \\
+\midrule
+SMOTE & \texttt{random\_state=42} \\
+Poids de classe & \texttt{class\_weight='balanced'} \\
+Seuil de décision & Abaissé de 0.5 → 0.35 (recommandé) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Problème de Data Leakage}
+\label{sec:leakage}
+% ==============================================================================
+
+\subsection{Symptôme Détecté}
+
+Lors des premières expériences, le modèle de classification atteignait un AUC-ROC de \textbf{1.00} —
+une perfection irréaliste qui signale inévitablement une \textbf{fuite de données} (\textit{data leakage}).
+
+\begin{warnbox}[Data Leakage Détecté]
+AUC initial = \textbf{1.00} $\rightarrow$ Performance irréaliste et non généralisable.\\
+Cause : présence de features contenant des informations du futur ou directement dérivées de la cible.
+\end{warnbox}
+
+\subsection{Features Fuyantes Identifiées}
+
+L'analyse des corrélations a révélé 14+ features problématiques :
+
+\begin{table}[H]
+\centering
+\caption{Features responsables de la fuite de données}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature} & \textbf{Corrélation avec Churn} & \textbf{Raison} \\
+\midrule
+\texttt{ChurnRiskCategory} & 0.88 & Construite pour prédire le churn \\
+\texttt{Recency} & 0.86 & Client parti $\Rightarrow$ récence élevée \\
+\texttt{CustomerType\_Perdu} & 0.70 & « Perdu » = churné par définition \\
+\texttt{RFMSegment\_Dormants} & 0.58 & « Dormant » = inactif \\
+\texttt{LoyaltyLevel} & $-$0.43 & Calculé sur historique récent \\
+\texttt{AccountStatus\_Closed} & — & Statut post-churn \\
+\texttt{TenureRatio} & — & Dérivé de la date de résiliation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Solution Appliquée}
+
+Exclusion stricte de toutes les features fuyantes via la liste \texttt{LEAKY\_CHURN\_FEATURES}
+dans \texttt{preprocessing.py} :
+
+\begin{lstlisting}[language=Python, caption=Exclusion des features fuyantes]
+LEAKY_CHURN_FEATURES = [
+    'Recency', 'CustomerTenureDays', 'FirstPurchaseDaysAgo',
+    'TenureRatio', 'MonetaryPerDay',
+    'ChurnRiskCategory', 'LoyaltyLevel', 'SpendingCategory',
+    'CustomerType_Perdu', 'CustomerType_Hyperactif',
+    'CustomerType_Nouveau', 'CustomerType_Occasionnel',
+    'CustomerType_Regulier',
+    'RFMSegment_Champions', 'RFMSegment_Dormants',
+    'RFMSegment_Fideles', 'RFMSegment_Potentiels',
+    'AccountStatus_Closed', 'AccountStatus_Suspended',
+    'AccountStatus_Active', 'AccountStatus_Pending'
+]
+\end{lstlisting}
+
+\begin{successbox}[Résultat après correction]
+AUC-ROC : \textbf{1.00} $\rightarrow$ \textbf{0.958} \\
+Le modèle délivre désormais des performances réalistes et généralisables à des données inédites.
+\end{successbox}
+
+% ==============================================================================
+\section{Modèle 1 — Classification du Churn}
+% ==============================================================================
+
+\subsection{Objectif}
+
+Détecter les clients à risque de départ \textbf{avant qu'ils ne partent}, afin de déclencher
+des actions de rétention ciblées et précoces.
+
+\subsection{Architecture du Pipeline}
+
+Le pipeline intègre toutes les étapes de manière cohérente pour éviter toute fuite :
+
+\begin{lstlisting}[language=Python, caption=Pipeline de classification (scikit-learn)]
+ImbPipeline([
+    ('imputer',    KNNImputer(n_neighbors=5)),
+    ('scaler',     RobustScaler()),
+    ('smote',      SMOTE(random_state=42)),
+    ('classifier', RandomForestClassifier(
+        n_estimators=200,
+        max_depth=10,
+        min_samples_leaf=10,
+        class_weight='balanced'
+    ))
+])
+\end{lstlisting}
+
+Le choix de \texttt{RobustScaler} (plutôt que \texttt{StandardScaler}) assure une robustesse
+aux valeurs aberrantes résiduelles. L'utilisation d'\texttt{ImbPipeline} (bibliothèque
+\textit{imbalanced-learn}) permet d'intégrer SMOTE directement dans le pipeline,
+garantissant que le suréchantillonnage n'est appliqué qu'aux données d'entraînement.
+
+\subsection{Résultats et Métriques}
+
+\begin{table}[H]
+\centering
+\caption{Performances du modèle de classification churn}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrique} & \textbf{Valeur} & \textbf{Interprétation} \\
+\midrule
+AUC-ROC      & \textbf{0.958} & Excellent pouvoir discriminant \\
+Accuracy     & 88\%           & Précision globale \\
+Precision (Churn=1) & 0.81  & 81\% des alertes sont réelles \\
+Recall (Churn=1)    & \textbf{0.85} & 85\% des churners détectés \\
+F1-Score     & 0.87           & Équilibre précision/rappel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{resultbox}[Interprétation Métier]
+Le modèle identifie correctement \textbf{85\% des clients qui vont partir}.
+En abaissant le seuil de décision de $0.5 \to 0.35$, il est possible d'augmenter ce rappel
+au détriment de la précision — un arbitrage pertinent dans un contexte de rétention client
+où manquer un churner coûte plus cher qu'une fausse alerte.
+\end{resultbox}
+
+\subsection{Importance des Features}
+
+L'analyse des importances du Random Forest révèle les features les plus déterminantes :
+
+\begin{table}[H]
+\centering
+\caption{Top 10 features d'importance pour la prédiction du churn}
+\begin{tabular}{clc}
+\toprule
+\textbf{Rang} & \textbf{Feature} & \textbf{Importance (\%)} \\
+\midrule
+1 & \texttt{SatisfactionScore}          & 23.01\% \\
+2 & \texttt{PreferredMonth}             & 17.25\% \\
+3 & \texttt{Frequency}                  & 8.33\% \\
+4 & \texttt{NegativeQuantityCount}      & 7.54\% \\
+5 & \texttt{UniqueCountries}            & 4.89\% \\
+6 & \texttt{WeekendPurchaseRatio}       & 4.31\% \\
+7 & \texttt{TotalQuantity}              & 4.09\% \\
+8 & \texttt{MonetaryTotal}              & 3.68\% \\
+9 & \texttt{AgeCategory}               & 3.19\% \\
+10 & \texttt{PreferredTimeOfDay}        & 3.00\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Insight clé} : le score de satisfaction est la feature la plus prédictive (23\%),
+ce qui souligne l'importance d'un suivi proactif de l'expérience client.
+
+% ==============================================================================
+\section{Modèle 2 — Segmentation Clients (KMeans)}
+% ==============================================================================
+
+\subsection{Objectif}
+
+Regrouper les 4\,372 clients en \textbf{segments homogènes} basés sur leur comportement
+RFM (\textit{Recency}, \textit{Frequency}, \textit{Monetary}) enrichi, afin de personnaliser
+les actions marketing par profil.
+
+\subsection{Prétraitement Spécifique au Clustering}
+
+Le clustering nécessite un prétraitement adapté, distinct de celui de la classification :
+
+\begin{enumerate}
+  \item \textbf{Sélection de 11 features RFM} : \textit{Recency}, \textit{Frequency},
+        \textit{MonetaryTotal}, \textit{SatisfactionScore}, \textit{ReturnRatio},
+        \textit{UniqueProducts}, \textit{AvgDaysBetweenPurchases}, \textit{Age},
+        \textit{SupportTicketsCount}, \textit{AvgBasketValue}, \textit{CancelRate}.
+  \item \textbf{Filtrage} : exclusion des clients avec $\texttt{MonetaryTotal} = 0$
+        (52 clients supprimés, 4\,320 retenus).
+  \item \textbf{Winsorisation} aux percentiles 1--99 pour limiter l'influence des extrêmes.
+  \item \textbf{Transformation logarithmique} (\texttt{np.log1p}) sur les variables asymétriques :
+        \textit{Recency}, \textit{Frequency}, \textit{MonetaryTotal}, \textit{UniqueProducts},
+        \textit{AvgDaysBetweenPurchases}, \textit{AvgBasketValue}.
+  \item \textbf{Normalisation} avec \texttt{RobustScaler}.
+  \item \textbf{Réduction de dimension} par ACP (20 composantes, expliquant la variance maximale).
+\end{enumerate}
+
+\subsection{Sélection du Nombre de Clusters}
+
+La méthode du coude (\textit{elbow method}) combinée à l'analyse du score de silhouette a
+orienté le choix vers $k = 4$ clusters, offrant le meilleur compromis entre cohésion intra-cluster
+et séparation inter-cluster.
+
+\subsection{Profils des 4 Segments}
+
+\begin{table}[H]
+\centering
+\caption{Profils détaillés des 4 segments clients}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Segment} & \textbf{N} & \textbf{Monetary (£)} & \textbf{Recency (j)} & \textbf{Freq.} & \textbf{Churn} \\
+\midrule
+\textbf{VIP} ��         & 1\,311 & 5\,047 & 29 & 11.3 & 6.0\% \\
+\textbf{Occasionnel}     & 1\,202 & 762   & 71 & 3.5  & 28.5\% \\
+\textbf{Fidèle}          & 238   & 870   & 109 & 5.0 & 40.8\% \\
+\textbf{À Risque} ⚠️    & 1\,569 & 365   & 154 & 1.2 & 57.1\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Description des Segments}
+
+\begin{itemize}
+  \item \textbf{VIP (30\% de la base)} : clients à haute valeur, fréquents, récents.
+        Taux de churn très bas (6\%). Ce sont les ambassadeurs de la marque.
+  \item \textbf{Occasionnels (27.5\%)} : acheteurs à fréquence modérée,
+        montant faible, churn modéré (28.5\%).
+  \item \textbf{Fidèles (5.5\%)} : clients avec historique d'achat mais inactivité
+        récente croissante — churn préoccupant (40.8\%).
+  \item \textbf{À Risque (35.9\%)} : clients inactifs, faible dépense, forte
+        probabilité de churn (57.1\%). Priorité d'action.
+\end{itemize}
+
+\subsection{Métriques de Qualité du Clustering}
+
+\begin{table}[H]
+\centering
+\caption{Métriques de qualité du clustering KMeans}
+\begin{tabular}{lll}
+\toprule
+\textbf{Métrique} & \textbf{Valeur} & \textbf{Interprétation} \\
+\midrule
+Silhouette Score   & 0.228   & Acceptable (données comportementales) \\
+Davies-Bouldin     & 1.30    & Séparation raisonnable \\
+Calinski-Harabasz  & 692     & Bonne cohésion intra-cluster \\
+Inertie            & 20\,586\,522 & Compacité globale \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{resultbox}[Note sur le Silhouette Score]
+Un score de silhouette de 0.228 peut paraître faible sur des données comportementales continues
+avec chevauchement naturel. La comparaison avec le score initial de 0.99 (obtenu sans
+winsorisation ni log-transform) illustre qu'une valeur quasi-parfaite sur données non traitées
+signalait des clusters triviaux dominés par les outliers — non de vrais groupes homogènes.
+\end{resultbox}
+
+% ==============================================================================
+\section{Modèle 3 — Prévision de la Valeur Client}
+% ==============================================================================
+
+\subsection{Objectif}
+
+Estimer le \textbf{montant total dépensé} (\texttt{MonetaryTotal}) par un client, afin de
+scorer la base client par potentiel de revenus et d'allouer les ressources marketing en conséquence.
+
+\subsection{Architecture du Pipeline}
+
+\begin{lstlisting}[language=Python, caption=Pipeline de régression]
+Pipeline([
+    ('imputer',   KNNImputer(n_neighbors=5)),
+    ('scaler',    RobustScaler()),
+    ('regressor', LinearRegression())
+])
+\end{lstlisting}
+
+Plusieurs modèles ont été évalués (Régression Linéaire, Ridge, Random Forest Regressor).
+La Régression Linéaire a été retenue comme modèle de référence pour sa simplicité
+et son interprétabilité, avec $R^2 = 0.668$.
+
+\subsection{Résultats}
+
+\begin{table}[H]
+\centering
+\caption{Performances du modèle de régression}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrique} & \textbf{Valeur} & \textbf{Interprétation} \\
+\midrule
+$R^2$  & \textbf{0.668} & 66.8\% de la variance expliquée \\
+MAE    & 864 £          & Erreur absolue moyenne \\
+RMSE   & 1\,124 £       & Erreur quadratique moyenne \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{resultbox}[Exemple de Prédictions]
+\begin{itemize}
+  \item Client haute fréquence (80 commandes, 2\,999 £ dépensés) :\\
+        Churn = \textbf{15.9\%}, Segment = \textit{VIP}, Valeur estimée = \textbf{88\,789 £}
+  \item Client basse fréquence (faibles dépenses) :\\
+        Churn = \textbf{96.4\%}, Segment = \textit{Occasionnel}, Valeur estimée = \textbf{3\,552 £}
+\end{itemize}
+\end{resultbox}
+
+% ==============================================================================
+\section{Application Flask — Déploiement}
+% ==============================================================================
+
+\subsection{Architecture de l'Application}
+
+L'application Flask expose \textbf{4 pages principales} et une \textbf{API REST} :
+
+\begin{table}[H]
+\centering
+\caption{Routes de l'application Flask}
+\begin{tabular}{lll}
+\toprule
+\textbf{Route} & \textbf{Méthode} & \textbf{Description} \\
+\midrule
+\texttt{/}           & GET      & Dashboard — métriques et aperçu des segments \\
+\texttt{/predict}    & GET/POST & Formulaire RFM → prédiction (churn + segment + valeur) \\
+\texttt{/segments}   & GET      & Profils détaillés des 4 segments \\
+\texttt{/about}      & GET      & Documentation technique et stack \\
+\texttt{/api/predict}& POST     & Endpoint REST JSON \\
+\texttt{/run-models} & POST     & Relance l'entraînement \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{API REST}
+
+\subsubsection{Endpoint \texttt{POST /api/predict}}
+
+\textbf{Requête JSON :}
+\begin{lstlisting}[language=Python, caption=Exemple de requête API]
+{
+  "Frequency": 5,
+  "MonetaryTotal": 1200,
+  "Age": 35,
+  "Gender": "M",
+  "AgeCategory": "35-44",
+  "PreferredMonth": 3,
+  "FavoriteSeason": "Printemps",
+  "SatisfactionScore": 4,
+  "SupportTicketsCount": 1
+}
+\end{lstlisting}
+
+\textbf{Réponse JSON :}
+\begin{lstlisting}[language=Python, caption=Exemple de réponse API]
+{
+  "churn": 0,
+  "probability": 0.15,
+  "risk": "Faible",
+  "cluster": 1,
+  "cluster_name": "Fidele",
+  "monetary_prediction": 1850.25
+}
+\end{lstlisting}
+
+\subsection{Artefacts Générés}
+
+L'entraînement produit 7 artefacts sauvegardés avec \texttt{joblib} :
+
+\begin{itemize}
+  \item \texttt{churn\_pipeline.pkl} — Pipeline complet Random Forest + SMOTE
+  \item \texttt{clustering\_preprocessor\_pipeline.pkl} — KNNImputer + Scaler + PCA
+  \item \texttt{kmeans\_model.pkl} — Modèle KMeans $k=4$
+  \item \texttt{regression\_pipeline.pkl} — Pipeline Régression Linéaire
+  \item \texttt{cluster\_label\_mapping.pkl} — Correspondance id $\to$ label métier
+  \item \texttt{processed\_columns.pkl} — Colonnes attendues après preprocessing
+  \item \texttt{dashboard\_metrics.pkl} — Métriques pré-calculées pour le dashboard
+\end{itemize}
+
+% ==============================================================================
+\section{Résumé des Défis Résolus}
+% ==============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Problèmes rencontrés et solutions apportées}
+\begin{tabular}{p{3.5cm}p{2.5cm}p{2.5cm}p{4cm}}
+\toprule
+\textbf{Problème} & \textbf{Avant} & \textbf{Après} & \textbf{Solution} \\
+\midrule
+Data leakage churn & AUC = 1.00 & AUC = 0.958 & Exclusion de 14+ features fuyantes \\
+\addlinespace
+Clustering trivial & Silhouette = 0.99 & Silhouette = 0.228 & Winsorisation + log-transform \\
+\addlinespace
+Déséquilibre classes & 67/33\% & Équilibré & SMOTE + \texttt{class\_weight='balanced'} \\
+\addlinespace
+Fuite dans imputation & Avant split & Dans pipeline & KNNImputer intégré au Pipeline \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Stack Technique}
+% ==============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Technologies utilisées dans le projet}
+\begin{tabular}{ll}
+\toprule
+\textbf{Catégorie} & \textbf{Technologies} \\
+\midrule
+ML / Data Science & scikit-learn 1.3+, imbalanced-learn, pandas 2.0+, numpy 1.24+ \\
+Visualisation & matplotlib, seaborn, plotly, Chart.js \\
+Déploiement & Flask 2.3+, joblib, gunicorn \\
+Frontend & Bootstrap 5.3, Font Awesome 6.4 \\
+Développement & Jupyter Notebook (5 notebooks), pytest, black \\
+Langage & Python 3.13 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Recommandations Métier}
+% ==============================================================================
+
+\subsection{Réduction du Taux de Churn}
+
+\begin{itemize}
+  \item \textbf{Satisfaction client en priorité} : le score de satisfaction est la feature
+        la plus prédictive (23\%). Un programme de suivi post-achat et de résolution rapide
+        des tickets support peut réduire significativement le churn.
+  \item \textbf{Campagnes saisonnières ciblées} : \texttt{PreferredMonth} est la 2\textsuperscript{e}
+        feature la plus importante. Des offres personnalisées selon la saisonnalité préférée
+        du client sont recommandées.
+  \item \textbf{Ajustement du seuil de décision} : passer de $0.5 \to 0.35$ pour maximiser
+        la détection des churners au prix d'une légère baisse de précision — arbitrage favorable
+        quand le coût de rétention est inférieur au coût d'acquisition d'un nouveau client.
+\end{itemize}
+
+\subsection{Personnalisation Marketing par Segment}
+
+\begin{itemize}
+  \item \textbf{VIP (churn 6\%)} : programme premium, ventes privées, accès anticipé
+        aux nouvelles collections, service client dédié.
+  \item \textbf{Fidèles (churn 40.8\%)} : campagnes de réactivation, cross-selling ciblé,
+        programme de fidélité avec récompenses progressives.
+  \item \textbf{Occasionnels (churn 28.5\%)} : promotions saisonnières, offres de bienvenue,
+        newsletters personnalisées pour augmenter la fréquence d'achat.
+  \item \textbf{À Risque (churn 57.1\%)} : enquête de satisfaction, geste commercial,
+        offre de réengagement urgente avant la résiliation définitive.
+\end{itemize}
+
+\subsection{Optimisation du Chiffre d'Affaires}
+
+\begin{itemize}
+  \item Scorer les clients par potentiel de dépense avant chaque campagne marketing.
+  \item Envisager un modèle XGBoost dédié aux clients à dépenses élevées (outliers).
+  \item Collecter des données de navigation et de wishlist pour enrichir les features
+        comportementales et améliorer le $R^2$ du modèle de régression.
+\end{itemize}
+
+% ==============================================================================
+\section{Améliorations Futures}
+% ==============================================================================
+
+\subsection{Court Terme}
+
+\begin{itemize}
+  \item Hyperparameter tuning via GridSearchCV ou Optuna (notamment pour Random Forest et KMeans).
+  \item Feature selection automatique (RFE, SHAP values) pour réduire la dimensionnalité.
+  \item Tests unitaires avec pytest pour garantir la robustesse du pipeline.
+  \item Documentation API avec Swagger / OpenAPI.
+\end{itemize}
+
+\subsection{Moyen Terme}
+
+\begin{itemize}
+  \item Déploiement Docker + Kubernetes pour la mise en production scalable.
+  \item Monitoring du data drift avec Evidently AI (détection des dégradations de performance).
+  \item Dashboard interactif avec Streamlit ou Dash pour les équipes métier.
+  \item A/B testing des modèles en production pour valider l'impact réel sur la rétention.
+\end{itemize}
+
+\subsection{Long Terme}
+
+\begin{itemize}
+  \item Deep Learning pour la modélisation des séquences temporelles d'achats (LSTM, Transformer).
+  \item Pipeline MLOps complet avec MLflow (tracking des expériences) et DVC (versioning des données).
+  \item Prédictions en temps réel via Apache Kafka et streaming.
+  \item AutoML (H2O.ai) pour l'exploration automatisée des architectures de modèles.
+\end{itemize}
+
+% ==============================================================================
+\section{Conclusion}
+% ==============================================================================
+
+Ce projet démontre la mise en œuvre d'un \textbf{pipeline Machine Learning complet et
+production-ready} pour l'analyse comportementale d'une clientèle e-commerce. Les trois
+objectifs principaux ont été atteints :
+
+\begin{enumerate}
+  \item \textbf{Classification du churn} avec un AUC-ROC de \textbf{0.958}, après correction
+        d'un problème de data leakage qui produisait initialement un score parfait et trompeur de 1.00.
+  \item \textbf{Segmentation en 4 clusters} (VIP, Fidèle, Occasionnel, À Risque) avec des
+        profils métier distincts et actionnables, suite à un prétraitement rigoureux par
+        winsorisation et transformation logarithmique.
+  \item \textbf{Prévision de la valeur client} avec un $R^2$ de \textbf{0.668}, permettant
+        de scorer la base client par potentiel de revenus.
+\end{enumerate}
+
+L'ensemble du système est encapsulé dans une \textbf{application Flask} avec interface graphique
+et API REST, rendant les prédictions accessibles aux équipes métier sans expertise technique.
+
+Les défis résolus — notamment la détection et correction du data leakage, la gestion du
+déséquilibre de classes par SMOTE, et le clustering non trivial par transformation logarithmique —
+illustrent les pièges classiques du Machine Learning en production et les bonnes pratiques
+pour les surmonter.
+
+\bigskip
+\begin{center}
+{\color{primary}\rule{0.6\linewidth}{0.8pt}}\\[0.4em]
+{\small\itshape
+Rapport réalisé dans le cadre du Module Machine Learning — GI2S1 MolkaChaoui — 2025--2026\\
+Atelier : Analyse Comportementale Clientèle Retail}
+\end{center}
+
+\end{document}
