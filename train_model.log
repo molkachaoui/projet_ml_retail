@@ -1,0 +1,84 @@
+[OK] Chargement -> c:\Users\DELL\Downloads\ML_Project-main\ML_Project-main\ML_Project\data\processed\retail_customers_processed.csv
+
+==============================================================
+  CLASSIFICATION CHURN  (Random Forest + XGBoost)
+==============================================================
+[i] Features : 66 colonnes | 4372 exemples
+[i] Churn=1  : 1454   Churn=0 : 2918
+[->] Entrainement RandomForest...
+[OK] RandomForest ROC-AUC = 0.963
+[->] Entrainement XGBoost...
+[OK] XGBoost ROC-AUC = 0.976
+
+--- Top 15 features ---
+  SatisfactionScore                            0.2301
+  PreferredMonth                               0.1725
+  Frequency                                    0.0833
+  NegativeQuantityCount                        0.0754
+  UniqueCountries                              0.0489
+  WeekendPurchaseRatio                         0.0431
+  TotalQuantity                                0.0409
+  MonetaryTotal                                0.0368
+  AgeCategory                                  0.0319
+  PreferredTimeOfDay                           0.0300
+  UniqueProducts                               0.0258
+  TotalTransactions                            0.0236
+  AvgDaysBetweenPurchases                      0.0232
+  BasketSizeCategory                           0.0163
+  UniqueDescriptions                           0.0095
+
+[OK] Sauvegarde -> churn_pipeline.pkl
+
+==============================================================
+  CLUSTERING  (KMeans)
+==============================================================
+[i] Clients apres filtrage MonetaryTotal>0 : 4320 (retires: 52)
+[OK] KMeans k=4 | Silhouette = 0.172
+
+--- Profil brut des clusters ---
+         MonetaryTotal  Recency  Frequency  Churn  SatisfactionScore  n_clients
+Cluster                                                                        
+0               762.19    70.96       3.53   0.29               2.90       1202
+1              5047.31    28.90      11.27   0.06               2.94       1311
+2               870.35   108.67       4.97   0.41               2.97        238
+3               365.19   153.80       1.22   0.57               2.93       1569
+
+--- Profil par label ---
+             MonetaryTotal  Recency  ...  SatisfactionScore  n_clients
+Label                                ...                              
+A Risque            365.19   153.80  ...               2.93       1569
+Fidele              870.35   108.67  ...               2.97        238
+Occasionnel         762.19    70.96  ...               2.90       1202
+VIP                5047.31    28.90  ...               2.94       1311
+
+[4 rows x 6 columns]
+  VIP         : churn=6.0%  n=1311
+  Fidele      : churn=40.8%  n=238
+  Occasionnel : churn=28.5%  n=1202
+  A Risque    : churn=57.1%  n=1569
+
+[OK] Sauvegardes clustering -> c:\Users\DELL\Downloads\ML_Project-main\ML_Project-main\ML_Project\models
+
+==============================================================
+  REGRESSION  (MonetaryTotal)
+==============================================================
+[i] Features : 80 colonnes
+[->] Entrainement LinearRegression...
+Traceback (most recent call last):
+  File "c:\Users\DELL\Downloads\ML_Project-main\ML_Project-main\ML_Project\src\train_model.py", line 474, in <module>
+    main()
+    ~~~~^^
+  File "c:\Users\DELL\Downloads\ML_Project-main\ML_Project-main\ML_Project\src\train_model.py", line 448, in main
+    regression_metrics = train_regression_model(df)
+  File "c:\Users\DELL\Downloads\ML_Project-main\ML_Project-main\ML_Project\src\train_model.py", line 393, in train_regression_model
+    rmse = mean_squared_error(y_test, y_pred, squared=False)
+  File "C:\Users\DELL\AppData\Local\Programs\Python\Python314\Lib\site-packages\sklearn\utils\_param_validation.py", line 196, in wrapper
+    params = func_sig.bind(*args, **kwargs)
+  File "C:\Users\DELL\AppData\Local\Programs\Python\Python314\Lib\inspect.py", line 3225, in bind
+    return self._bind(args, kwargs)
+           ~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\DELL\AppData\Local\Programs\Python\Python314\Lib\inspect.py", line 3214, in _bind
+    raise TypeError(
+        'got an unexpected keyword argument {arg!r}'.format(
+            arg=next(iter(kwargs))))
+TypeError: got an unexpected keyword argument 'squared'

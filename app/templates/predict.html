@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Prédiction Churn — Retail ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-search me-2"></i>Prédiction client basée sur le RFM</h1>
+        <p>Remplissez les valeurs RFM de ce client pour déterminer :</p>
+        <ul class="small text-muted mt-2">
+            <li>✅ churn ou non</li>
+            <li>✅ segment KMeans</li>
+            <li>✅ valeur monétaire estimée</li>
+        </ul>
+    </div>
+</div>
+
+<div class="container pb-4">
+<form method="POST" action="/predict" id="predictForm">
+
+<div class="row g-4">
+
+    <!-- ── COLONNE GAUCHE : Formulaire ── -->
+    <div class="col-lg-7">
+
+        <!-- Section 1 : Données RFM -->
+        <div class="form-section">
+            <h5><i class="fas fa-pound-sign me-2 text-primary"></i>Données RFM & Transactions</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Fréquence (nb commandes)</label>
+                    <input type="number" name="Frequency" class="form-control"
+                           placeholder="ex: 5" min="1" max="248"
+                           value="{{ result.form_data.Frequency if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Total dépensé (£)</label>
+                    <input type="number" step="0.01" name="MonetaryTotal" class="form-control"
+                           placeholder="ex: 1200"
+                           value="{{ result.form_data.MonetaryTotal if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Panier moyen (£)</label>
+                    <input type="number" step="0.01" name="MonetaryAvg" class="form-control"
+                           placeholder="ex: 240"
+                           value="{{ result.form_data.MonetaryAvg if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Panier max (£)</label>
+                    <input type="number" step="0.01" name="MonetaryMax" class="form-control"
+                           placeholder="ex: 800"
+                           value="{{ result.form_data.MonetaryMax if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Total transactions (lignes)</label>
+                    <input type="number" name="TotalTransactions" class="form-control"
+                           placeholder="ex: 30"
+                           value="{{ result.form_data.TotalTransactions if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Délai moyen entre achats (jours)</label>
+                    <input type="number" step="0.1" name="AvgDaysBetweenPurchases" class="form-control"
+                           placeholder="ex: 45"
+                           value="{{ result.form_data.AvgDaysBetweenPurchases if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Produits uniques achetés</label>
+                    <input type="number" name="UniqueProducts" class="form-control"
+                           placeholder="ex: 20"
+                           value="{{ result.form_data.UniqueProducts if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Taux de retour</label>
+                    <input type="number" step="0.01" name="ReturnRatio" class="form-control"
+                           placeholder="0.00 à 1.00" min="0" max="1"
+                           value="{{ result.form_data.ReturnRatio if result else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2 : Ancienneté -->
+        <div class="form-section">
+            <h5><i class="fas fa-calendar-alt me-2 text-info"></i>Ancienneté & Temporalité</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Durée relation client (jours)</label>
+                    <input type="number" name="CustomerTenureDays" class="form-control"
+                           placeholder="0 à 373"
+                           value="{{ result.form_data.CustomerTenureDays if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Premier achat (jours écoulés)</label>
+                    <input type="number" name="FirstPurchaseDaysAgo" class="form-control"
+                           placeholder="1 à 374"
+                           value="{{ result.form_data.FirstPurchaseDaysAgo if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Mois favori (1-12)</label>
+                    <input type="number" name="PreferredMonth" class="form-control"
+                           placeholder="1-12" min="1" max="12"
+                           value="{{ result.form_data.PreferredMonth if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Heure favorite (0-23)</label>
+                    <input type="number" name="PreferredHour" class="form-control"
+                           placeholder="0-23" min="0" max="23"
+                           value="{{ result.form_data.PreferredHour if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ratio achats weekend</label>
+                    <input type="number" step="0.01" name="WeekendPurchaseRatio" class="form-control"
+                           placeholder="0.00 à 1.00" min="0" max="1"
+                           value="{{ result.form_data.WeekendPurchaseRatio if result else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Saison préférée</label>
+                    <select name="FavoriteSeason" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for s in ['Automne','Hiver','Printemps','Été'] %}
+                        <option value="{{ s }}"
+                            {{ 'selected' if result and result.form_data.get('FavoriteSeason')==s else '' }}>
+                            {{ s }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Préférence weekend</label>
+                    <select name="WeekendPreference" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for w in ['Weekend','Semaine','Inconnu'] %}
+                        <option value="{{ w }}"
+                            {{ 'selected' if result and result.form_data.get('WeekendPreference')==w else '' }}>
+                            {{ w }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3 : Profil client -->
+        <div class="form-section">
+            <h5><i class="fas fa-user me-2 text-success"></i>Profil Client</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Âge</label>
+                    <input type="number" name="Age" class="form-control"
+                           placeholder="18 à 80" min="18" max="80"
+                           value="{{ result.form_data.Age if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Score satisfaction (1-5)</label>
+                    <input type="number" step="0.5" name="SatisfactionScore" class="form-control"
+                           placeholder="1 à 5" min="1" max="5"
+                           value="{{ result.form_data.SatisfactionScore if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tickets support (0-15)</label>
+                    <input type="number" name="SupportTicketsCount" class="form-control"
+                           placeholder="0 à 15" min="0" max="15"
+                           value="{{ result.form_data.SupportTicketsCount if result else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Genre</label>
+                    <select name="Gender" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for g in [('M','Homme'),('F','Femme'),('Unknown','Inconnu')] %}
+                        <option value="{{ g[0] }}"
+                            {{ 'selected' if result and result.form_data.get('Gender')==g[0] else '' }}>
+                            {{ g[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Statut du compte</label>
+                    <select name="AccountStatus" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for s in ['Active','Pending','Suspended','Closed'] %}
+                        <option value="{{ s }}"
+                            {{ 'selected' if result and result.form_data.get('AccountStatus')==s else '' }}>
+                            {{ s }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Diversité produits</label>
+                    <select name="ProductDiversity" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for p in ['Explorateur','Modéré','Spécialisé'] %}
+                        <option value="{{ p }}"
+                            {{ 'selected' if result and result.form_data.get('ProductDiversity')==p else '' }}>
+                            {{ p }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Région</label>
+                    <select name="Region" class="form-select">
+                        <option value="">-- Sélectionner --</option>
+                        {% for r in ['UK','Europe_continentale','Europe_du_Nord','Europe_du_Sud',
+                                     'Europe_centrale','Europe_de_lEst','Asie','Océanie',
+                                     'Amérique_du_Nord','Amérique_du_Sud','Afrique','Moyen-Orient','Autre'] %}
+                        <option value="{{ r }}"
+                            {{ 'selected' if result and result.form_data.get('Region')==r else '' }}>
+                            {{ r.replace('_',' ') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Pays (taux churn moyen, 0.0–1.0)</label>
+                    <input type="number" step="0.01" name="Country_encoded" class="form-control"
+                           placeholder="ex: 0.33 pour UK" min="0" max="1"
+                           value="{{ result.form_data.Country_encoded if result else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary btn-predict">
+                <i class="fas fa-search me-2"></i>Prédire le client
+            </button>
+            <a href="/predict" class="btn btn-outline-secondary btn-reset">
+                <i class="fas fa-redo me-2"></i>Réinitialiser
+            </a>
+        </div>
+    </div>
+
+    <!-- ── COLONNE DROITE : Résultats ── -->
+    <div class="col-lg-5">
+
+        {% if result %}
+        <div class="card mb-3 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="mb-3">Résultats</h5>
+                <div class="mb-4 p-3 rounded" style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.15);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div><strong>Churn</strong></div>
+                        <span class="badge bg-{{ result.churn_color }} text-white">{{ 'Oui' if result.churn_label == 1 else 'Non' }}</span>
+                    </div>
+                    <div class="h2 fw-bold text-{{ result.churn_color }} mb-1">{{ result.churn_prob }}%</div>
+                    <div class="small text-muted">Probabilité de churn estimée</div>
+                </div>
+
+                <div class="mb-4 p-3 rounded" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div><strong>Segment</strong></div>
+                        <span class="badge bg-{{ result.cluster_color }} text-white">Cluster {{ result.cluster_id }}</span>
+                    </div>
+                    <div class="h4 fw-bold text-{{ result.cluster_color }} mb-1">{{ result.cluster_name }}</div>
+                    <div class="small text-muted">Taux de churn moyen du segment : {{ result.cluster_churn }}</div>
+                </div>
+
+                <div class="mb-4 p-3 rounded" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div><strong>Valeur monétaire</strong></div>
+                        <span class="badge bg-info text-white">Régression</span>
+                    </div>
+                    <div class="h2 fw-bold text-success mb-1">{{ result.monetary_pred }} €</div>
+                    <div class="small text-muted">Montant prédit pour le client</div>
+                </div>
+
+                <div class="alert alert-secondary py-3" role="alert">
+                    <strong>Note :</strong> cette prédiction utilise les données RFM saisies.
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card h-100 border-dashed d-flex align-items-center justify-content-center text-center p-5 text-muted" style="border: 2px dashed #dee2e6; background: #fafafa; border-radius: 12px;">
+            <i class="fas fa-search fa-4x mb-3 opacity-25"></i>
+            <h5>Aucune prédiction</h5>
+            <p class="small">Renseignez les données RFM du client<br>et cliquez sur "Prédire la catégorie"</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+</form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animation de la jauge au chargement
+window.addEventListener('load', () => {
+    const fill = document.querySelector('.result-gauge-fill');
+    if (fill) {
+        const w = fill.style.width;
+        fill.style.width = '0%';
+        setTimeout(() => { fill.style.width = w; }, 100);
+    }
+});
+</script>
+{% endblock %}

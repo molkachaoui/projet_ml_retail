@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Retail ML Dashboard{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:   #1f2937;
+            --accent:    #2563eb;
+            --success:   #16a34a;
+            --danger:    #dc2626;
+            --warning:   #d97706;
+            --muted:     #6b7280;
+            --surface:   #ffffff;
+            --surface2:  #f8fafc;
+            --surface3:  #e2e8f0;
+        }
+
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; color: #1f2937; }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: #ffffff;
+            padding: 0.85rem 1.5rem;
+            box-shadow: 0 1px 15px rgba(15, 23, 42, 0.08);
+        }
+        .navbar-brand { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500;
+                    transition: color 0.2s; }
+        .nav-link:hover, .nav-link.active { color: #fff !important; }
+
+        /* ── Page header ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+            color: #fff;
+            padding: 2.5rem 2rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .page-header h1 { font-weight: 700; font-size: 1.9rem; margin: 0; }
+        .page-header p  { opacity: 0.8; margin: 0.4rem 0 0; }
+
+        /* ── Cards ── */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+
+        /* ── Stat cards ── */
+        .stat-card { border-left: 5px solid var(--accent); }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; color: #7f8c8d; text-transform: uppercase; }
+        .stat-icon  { font-size: 2.5rem; opacity: 0.15; }
+
+        /* ── Form ── */
+        .form-section { background: #fff; border-radius: 12px; padding: 1.5rem;
+                         margin-bottom: 1.5rem; border-left: 4px solid var(--accent); }
+        .form-section h5 { color: var(--primary); font-weight: 700; margin-bottom: 1rem; }
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #555; }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1.5px solid #dee2e6;
+            font-size: 0.9rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+        }
+
+        /* ── Result card ── */
+        .result-card { border-radius: 16px; padding: 2rem;
+                        border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .result-prob { font-size: 3.5rem; font-weight: 800; }
+        .result-gauge { height: 14px; border-radius: 7px; background: #ecf0f1; }
+        .result-gauge-fill { height: 100%; border-radius: 7px;
+                              transition: width 0.8s ease; }
+
+        /* ── Segment cards ── */
+        .segment-card { border-radius: 16px; overflow: hidden; }
+        .segment-header { padding: 1.2rem 1.5rem; color: #fff; }
+        .segment-body   { padding: 1.5rem; }
+
+        /* ── Pipeline step ── */
+        .pipeline-step { display: flex; align-items: flex-start; gap: 1rem;
+                          padding: 1rem; border-radius: 10px; background: #fff;
+                          margin-bottom: 0.75rem;
+                          box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+        .pipeline-num { width: 36px; height: 36px; border-radius: 50%;
+                         display: flex; align-items: center; justify-content: center;
+                         font-weight: 700; color: #fff; flex-shrink: 0; }
+
+        /* ── Footer ── */
+        footer { background: #ffffff; color: #475569;
+                  padding: 1.2rem; text-align: center; margin-top: 3rem; font-size: 0.85rem; border-top: 1px solid #e2e8f0; }
+        footer a { color: var(--accent); text-decoration: none; }
+
+        .card-dashboard {
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .card-dashboard:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
+        .card-dashboard .card-body { min-height: 150px; }
+        .dashboard-step { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem; }
+        .page-header { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px 26px; margin-bottom: 24px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04); }
+        .page-header h1 { margin: 0; font-size: 28px; font-weight: 700; }
+        .page-header p { margin: 8px 0 0; color: #475569; }
+
+        /* ── Btn ── */
+        .btn-predict { padding: 0.8rem 2.5rem; font-size: 1rem;
+                        font-weight: 700; border-radius: 10px; }
+        .btn-reset   { padding: 0.8rem 1.5rem; font-size: 1rem; border-radius: 10px; }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="/">
+            <i class="fas fa-brain me-2"></i>Retail<span>ML</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto gap-1">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                        <i class="fas fa-home me-1"></i>Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/predict' %}active{% endif %}" href="/predict">
+                        <i class="fas fa-search me-1"></i>Prédiction
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/segments' %}active{% endif %}" href="/segments">
+                        <i class="fas fa-users me-1"></i>Segments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="/about">
+                        <i class="fas fa-info-circle me-1"></i>À propos
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ── CONTENT ── -->
+{% block content %}{% endblock %}
+
+<!-- ── FOOTER ── -->
+<footer>
+    <i class="fas fa-brain me-1"></i>
+    Retail ML — Analyse Comportementale Clientèle &nbsp;|&nbsp;
+    Module Machine Learning GI2 &nbsp;|&nbsp; 2025-2026
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

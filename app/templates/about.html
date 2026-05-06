@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}À Propos — Retail ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-graduation-cap me-2"></i>À Propos du Projet</h1>
+        <p>Atelier Machine Learning — Analyse Comportementale Clientèle Retail — GI2 — 2025-2026</p>
+    </div>
+</div>
+
+<div class="container pb-4">
+<div class="row g-4">
+
+    <!-- Pipeline -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header fw-bold">
+                <i class="fas fa-sitemap me-2"></i>Pipeline du Projet
+            </div>
+            <div class="card-body">
+                {% for num, name, desc, icon, color in pipeline %}
+                <div class="pipeline-step">
+                    <div class="pipeline-num bg-{{ color }}">{{ num }}</div>
+                    <div>
+                        <div class="fw-bold">
+                            <i class="fas {{ icon }} me-1 text-{{ color }}"></i>{{ name }}
+                        </div>
+                        <div class="small text-muted">{{ desc }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Modèles -->
+    <div class="col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header fw-bold">
+                <i class="fas fa-brain me-2"></i>Modèles Entraînés
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Modèle</th><th>Tâche</th>
+                            <th>Performance</th><th>Utilité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, task, perf, util in models_info %}
+                        <tr>
+                            <td><strong>{{ name }}</strong></td>
+                            <td>{{ task }}</td>
+                            <td><code>{{ perf }}</code></td>
+                            <td class="text-muted">{{ util }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Dataset -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold">
+                <i class="fas fa-database me-2"></i>Dataset
+            </div>
+            <div class="card-body small">
+                <div class="row g-2">
+                    {% for label, val in [
+                        ('Clients',    '4 372'),
+                        ('Features',   '52 initiales → 87 après encoding'),
+                        ('Cible',      'Churn (0/1)'),
+                        ('Churn rate', '33.3%'),
+                        ('Source',     'E-commerce de cadeaux UK'),
+                    ] %}
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="fw-bold text-secondary">{{ label }}</span>
+                            <span>{{ val }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech stack -->
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="fas fa-code me-2"></i>Stack Technique
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tech in ['Python 3.13','Flask','scikit-learn','pandas',
+                                    'numpy','matplotlib','seaborn','joblib',
+                                    'Bootstrap 5','KMeans','Random Forest'] %}
+                    <span class="badge bg-primary bg-opacity-10 text-primary
+                                 border border-primary border-opacity-25 px-2 py-1">
+                        {{ tech }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommandations -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="fas fa-lightbulb text-warning me-2"></i>Recommandations Métier
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for title, color, icon, items in [
+                        ('Réduction du Churn', 'danger', 'fa-user-minus', [
+                            'Campagnes rétention pour clients ancienneté < 6 mois',
+                            'Offres exclusives avant la saison Automne (feature #1)',
+                            'Abaisser seuil de décision 0.5 → 0.35 pour réduire les faux négatifs',
+                        ]),
+                        ('Personnalisation Marketing', 'success', 'fa-bullseye', [
+                            'C1 VIP (4% churn) : programme premium, ventes privées',
+                            'C0 Occasionnels (15%) : promotions saisonnières, cross-sell',
+                            'C2 À Risque (50%) : enquête retours, geste commercial',
+                            'C3 Inactifs (100%) : campagne réactivation ou suppression',
+                        ]),
+                        ('Optimisation CA', 'info', 'fa-chart-line', [
+                            'Scorer les clients par potentiel de dépense',
+                            'Modèle XGBoost dédié pour les gros clients outliers',
+                            'Collecter données navigation et wishlist',
+                        ]),
+                    ] %}
+                    <div class="col-md-4">
+                        <div class="card border-{{ color }} h-100">
+                            <div class="card-header bg-{{ color }} bg-opacity-10 text-{{ color }} fw-bold">
+                                <i class="fas {{ icon }} me-2"></i>{{ title }}
+                            </div>
+                            <div class="card-body">
+                                <ul class="small text-muted mb-0">
+                                    {% for item in items %}
+                                    <li class="mb-1">{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}
