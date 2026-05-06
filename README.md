@@ -1,31 +1,60 @@
-# Projet Machine Learning - Analyse Comportementale Clientèle Retail
+# 🛒 Retail ML — Analyse Comportementale Clientèle
+
+> Système complet de Machine Learning pour la rétention client, la segmentation et la prévision des dépenses — déployé via Flask.
+
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
+![Flask](https://img.shields.io/badge/Flask-2.3+-green?logo=flask)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-orange?logo=scikit-learn)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple?logo=bootstrap)
+
+---
 
 ## 📋 Table des Matières
 
-- [À Propos](#à-propos)
-- [Objectifs](#objectifs)
-- [Architecture du Projet](#architecture-du-projet)
-- [Technologies Utilisées](#technologies-utilisées)
-- [Installation](#installation)
-- [Utilisation](#utilisation)
-- [Modèles ML](#modèles-ml)
-- [Résultats](#résultats)
-- [API Flask](#api-flask)
-- [Data Leakage](#data-leakage)
-- [Auteur](#auteur)
+1. [Vue d'ensemble](#-vue-densemble)
+2. [Démonstration](#-démonstration)
+3. [Architecture](#-architecture-du-projet)
+4. [Modèles ML](#-modèles-ml)
+5. [Data Leakage — Problème & Solution](#️-data-leakage--problème--solution)
+6. [Installation](#-installation)
+7. [Utilisation](#-utilisation)
+8. [API REST](#-api-rest)
+9. [Résultats & Performances](#-résultats--performances)
+10. [Recommandations Métier](#-recommandations-métier)
+11. [Améliorations Futures](#-améliorations-futures)
 
-## 🎯 À Propos
+---
 
-Ce projet implémente un système complet d'analyse comportementale clientèle pour une entreprise de retail. Il combine trois modèles de Machine Learning pour répondre aux besoins métier critiques : prédiction du churn, segmentation client, et prévision des dépenses.
+## 🎯 Vue d'ensemble
 
-Le système est déployable en production via une application web Flask avec API REST.
+Ce projet implémente un pipeline bout-en-bout d'analyse comportementale pour une entreprise de retail e-commerce (UK). Il répond à trois questions métier critiques :
 
-## 🚀 Objectifs
+| Question | Modèle | Performance |
+|---|---|---|
+| Ce client va-t-il partir ? | Random Forest (classification) | AUC = **0.958**, F1 = **0.85** |
+| À quel segment appartient-il ? | KMeans (clustering, k=4) | Silhouette = **0.228** |
+| Combien va-t-il dépenser ? | Régression Linéaire | R² = **0.668**, MAE = 864 £ |
 
-1. **Segmentation Clientèle** : Identifier 4 groupes homogènes (VIP, Fidèle, Occasionnel, À Risque)
-2. **Prédiction du Churn** : Détecter les clients à risque de départ avec 85% de recall
-3. **Prévision de Valeur** : Estimer les dépenses futures (MAE = 864 GBP)
-4. **Déploiement** : Application web accessible aux équipes métier
+**Dataset :** 4 372 clients, 52 features initiales → 87 après encodage, taux de churn global de 33.3%.
+
+---
+
+## 🖥️ Démonstration
+
+L'application Flask expose 4 pages :
+
+| Route | Description |
+|---|---|
+| `/` | Dashboard principal — métriques des 3 modèles, aperçu des segments |
+| `/predict` | Formulaire RFM → prédiction churn + segment + valeur monétaire |
+| `/segments` | Profils détaillés des 4 segments clients |
+| `/about` | Pipeline technique, stack, recommandations métier |
+
+**Exemple de prédiction :**
+- Client haute fréquence (80 commandes, 2999 £ dépensés) → **Churn 15.9%**, segment *Clients Fidèles*, valeur estimée 88 789 £
+- Client basse fréquence → **Churn 96.4%**, segment *Clients Occasionnels*, valeur estimée 3 552 £
+
+---
 
 ## 📁 Architecture du Projet
 
@@ -35,169 +64,61 @@ ML_Project/
 ├── data/
 │   ├── raw/
 │   │   └── retail_customers_COMPLETE_CATEGORICAL.csv
-│   └── processed/
-│       └── processed_data.csv
+│   ├── processed/
+│   │   └── retail_customers_processed.csv
+│   └── train_test/
 │
 ├── src/
-│   ├── preprocessing.py      # Pipeline de nettoyage (6 étapes)
+│   ├── preprocessing.py      # Pipeline nettoyage (6 étapes)
 │   ├── train_model.py        # Entraînement des 3 modèles
 │   ├── predict.py            # Inférence sur nouvelles données
 │   └── utils.py              # Fonctions utilitaires
 │
 ├── models/
-│   ├── churn_pipeline.pkl              # Random Forest + SMOTE
-│   ├── clustering_preprocessor_pipeline.pkl
-│   ├── kmeans_model.pkl                # KMeans k=4
-│   └── regression_pipeline.pkl         # Linear Regression
+│   ├── churn_pipeline.pkl                    # Random Forest + SMOTE
+│   ├── clustering_preprocessor_pipeline.pkl  # KNN Imputer + Scaler + PCA
+│   ├── kmeans_model.pkl                      # KMeans k=4
+│   ├── regression_pipeline.pkl               # Linear Regression
+│   ├── cluster_label_mapping.pkl             # id → label métier
+│   ├── processed_columns.pkl                 # Colonnes après preprocessing
+│   └── dashboard_metrics.pkl                 # Métriques pré-calculées
 │
 ├── app/
-│   ├── app.py                # Application Flask
-│   ├── templates/
-│   │   ├── index.html        # Dashboard
-│   │   ├── predict.html      # Formulaire de prédiction
-│   │   └── segments.html     # Profils des segments
-│   └── static/
-│       ├── css/
-│       └── js/
-│
-├── reports/
-│   ├── rapport.pdf           # Rapport technique complet
+│   ├── app.py
+│   └── templates/
+│       ├── base.html
+│       ├── index.html        # Dashboard dark-mode
+│       ├── predict.html      # Formulaire de prédiction
+│       ├── segments.html     # Profils segments
+│       └── about.html        # Description projet
 │
 ├── notebooks/
-│   ├── 01_EDA.ipynb         # Analyse exploratoire
+│   ├── 01_EDA.ipynb
 │   ├── 02_Preprocessing.ipynb
 │   ├── 03_Modeling.ipynb
 │   └── 04_Evaluation.ipynb
 │
+├── reports/
+│   └── rapport.pdf
+│
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
-## 🛠️ Technologies Utilisées
-
-### Machine Learning
-- **scikit-learn 1.3+** : Algorithmes ML (Random Forest, KMeans, Linear Regression)
-- **imbalanced-learn** : SMOTE pour gérer le déséquilibre des classes
-- **pandas 2.0+** : Manipulation de données
-- **numpy 1.24+** : Calculs numériques
-
-### Visualisation
-- **matplotlib 3.7+** : Graphiques statiques
-- **seaborn 0.12+** : Visualisations statistiques
-- **plotly 5.14+** : Graphiques interactifs
-
-### Déploiement
-- **Flask 2.3+** : Application web
-- **joblib** : Sérialisation des modèles
-- **gunicorn** : Serveur WSGI pour production
-
-### Développement
-- **jupyter** : Notebooks pour prototypage
-- **pytest** : Tests unitaires
-- **black** : Formatage de code
-
-## 📦 Installation
-
-### Prérequis
-- Python 3.8 ou supérieur
-- pip
-- virtualenv (recommandé)
-
-### Étapes
-
-```bash
-# 1. Cloner le repository
-git clone https://github.com/votre-username/ml-retail-analysis.git
-cd ml-retail-analysis
-
-# 2. Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate  # Windows
-
-# 3. Installer les dépendances
-pip install -r requirements.txt
-
-# 4. Vérifier l'installation
-python -c "import sklearn; import flask; print('✓ Installation réussie')"
-```
-
-## 🎮 Utilisation
-
-### 1️⃣ Prétraitement des Données
-
-```bash
-python src/preprocessing.py --input data/raw/retail_customers_COMPLETE_CATEGORICAL.csv \
-                            --output data/processed/processed_data.csv
-```
-
-**Étapes du pipeline :**
-1. Suppression features à variance nulle
-2. Correction valeurs aberrantes (-1, 99, 999)
-3. Parsing date d'inscription → 4 features temporelles
-4. Feature engineering sur IP
-5. Création features comportementales (AvgBasketValue)
-6. Encodage catégorielles (Ordinal, One-Hot, Target)
-
-### 2️⃣ Entraînement des Modèles
-
-```bash
-python src/train_model.py --data data/processed/processed_data.csv \
-                          --output-dir models/
-```
-
-**Modèles entraînés :**
-- `churn_pipeline.pkl` : Random Forest (200 arbres, max_depth=10)
-- `kmeans_model.pkl` : KMeans (k=4, features RFM)
-- `regression_pipeline.pkl` : Linear Regression
-
-### 3️⃣ Prédictions
-
-```bash
-# Prédiction sur un seul client
-python src/predict.py --input data/new_customer.json
-
-# Prédiction batch
-python src/predict.py --input data/customers_batch.csv \
-                      --output predictions.csv
-```
-
-**Exemple de fichier JSON :**
-```json
-{
-  "Frequency": 5,
-  "MonetaryTotal": 1200,
-  "Age": 35,
-  "Gender": "M",
-  "Country": "UK",
-  ...
-}
-```
-
-### 4️⃣ Lancer l'Application Flask
-
-```bash
-# Mode développement
-python app/app.py
-
-# Mode production
-gunicorn -w 4 -b 0.0.0.0:5000 app.app:app
-```
-
-Accédez à : `http://localhost:5000`
+---
 
 ## 🤖 Modèles ML
 
-### Modèle 1 : Classification du Churn (Random Forest)
+### 1 — Classification du Churn (Random Forest)
 
-**Pipeline :**
+Détecte les clients à risque de départ avant qu'ils ne partent.
+
+**Pipeline scikit-learn :**
 ```python
 ImbPipeline([
-    ('imputer', KNNImputer(n_neighbors=5)),
-    ('scaler', RobustScaler()),
-    ('smote', SMOTE(random_state=42)),
+    ('imputer',    KNNImputer(n_neighbors=5)),
+    ('scaler',     RobustScaler()),
+    ('smote',      SMOTE(random_state=42)),
     ('classifier', RandomForestClassifier(
         n_estimators=200,
         max_depth=10,
@@ -208,140 +129,193 @@ ImbPipeline([
 ```
 
 **Performances :**
+
 | Métrique | Valeur |
-|----------|--------|
-| AUC | **0.958** |
+|---|---|
+| AUC-ROC | **0.958** |
 | Accuracy | 88% |
 | Precision (Churn=1) | 0.81 |
 | Recall (Churn=1) | **0.85** |
 | F1-Score | 0.87 |
 
-**Top 5 Features Importantes :**
-1. `FavoriteSeason_Automne` (0.238)
-2. `PreferredMonth` (0.126)
-3. `Frequency` (0.063)
-4. `UniqueInvoices` (0.062)
-5. `FavoriteSeason_Printemps` (0.053)
+**Top 5 features importantes :**
+1. `FavoriteSeason_Automne` — 23.8%
+2. `PreferredMonth` — 12.6%
+3. `Frequency` — 6.3%
+4. `UniqueInvoices` — 6.2%
+5. `FavoriteSeason_Printemps` — 5.3%
 
-### Modèle 2 : Clustering (KMeans)
+> **Note :** Le seuil de décision peut être abaissé de 0.5 → 0.35 pour réduire les faux négatifs (clients partis non détectés).
+
+---
+
+### 2 — Segmentation Clients (KMeans, k=4)
+
+Regroupe les clients en 4 segments homogènes sur la base de leurs comportements RFM.
 
 **Prétraitement spécifique :**
-- Sélection : 9 features RFM uniquement
-- Filtrage : Exclusion clients avec MonetaryTotal ≤ 0
-- Winsorisation : Clip aux percentiles 1 et 99
-- Log-transform : `np.log1p()` sur variables asymétriques
-- Normalisation : RobustScaler
+- Sélection de 9 features RFM uniquement
+- Filtrage : clients avec `MonetaryTotal > 0`
+- Winsorisation aux percentiles 1–99
+- Log-transform (`np.log1p`) sur les variables asymétriques
+- Normalisation avec `RobustScaler`
+- Réduction de dimension par ACP (20 composantes)
 
-**k=4 segments identifiés :**
+**Segments identifiés :**
 
-| Segment | Taille | Monetary | Recency | Frequency | Churn |
-|---------|--------|----------|---------|-----------|-------|
-| **VIP** | 1 623 | 3 660€ | 34j | 8.8 | **8.3%** |
-| **Fidèle** | 461 | 2 708€ | 79j | 8.1 | 27.8% |
-| **Occasionnel** | 136 | 1 795€ | 109j | 5.9 | 42.6% |
-| **À Risque** | 2 100 | 420€ | 135j | 1.6 | **52.1%** |
+| Segment | Taille | Monetary moy. | Recency moy. | Frequency moy. | Churn |
+|---|---|---|---|---|---|
+| 🌟 **VIP** | 1 623 clients | 3 660 £ | 34 j | 8.8 | **8.3%** |
+| 💙 **Fidèle** | 461 clients | 2 708 £ | 79 j | 8.1 | 27.8% |
+| ⏱️ **Occasionnel** | 136 clients | 1 795 £ | 109 j | 5.9 | 42.6% |
+| ⚠️ **À Risque** | 2 100 clients | 420 £ | 135 j | 1.6 | **52.1%** |
 
-**Métriques :**
-- Silhouette Score : 0.228 (acceptable)
+**Métriques clustering :**
+- Silhouette Score : **0.228** (acceptable sur données comportementales continues)
+- Davies-Bouldin : 1.30
+- Calinski-Harabasz : 692
 - Inertie : 20 586 522
 
-### Modèle 3 : Régression (Linear Regression)
+---
+
+### 3 — Prévision de la Valeur Client (Régression Linéaire)
+
+Estime le montant total dépensé par un client.
 
 **Pipeline :**
 ```python
 Pipeline([
-    ('imputer', KNNImputer(n_neighbors=5)),
-    ('scaler', RobustScaler()),
-    ('regressor', LinearRegression())
+    ('imputer',    KNNImputer(n_neighbors=5)),
+    ('scaler',     RobustScaler()),
+    ('regressor',  LinearRegression())
 ])
 ```
 
 **Performances :**
-- **R² = 0.668** (explique 66.8% de la variance)
-- **MAE = 863.83 GBP** (erreur moyenne)
-- RMSE = 1 124 GBP
 
-## 📊 Résultats
+| Métrique | Valeur |
+|---|---|
+| R² | **0.668** |
+| MAE | **863.83 £** |
+| RMSE | 1 124 £ |
 
-### Synthèse des Performances
+---
 
-```
-┌─────────────────────┬──────────────┬─────────┬─────────────────┐
-│ Modèle              │ Métrique     │ Valeur  │ Interprétation  │
-├─────────────────────┼──────────────┼─────────┼─────────────────┤
-│ Random Forest       │ AUC          │ 0.958   │ Excellent       │
-│ (Churn)             │ Recall       │ 0.85    │ Détecte 85%     │
-├─────────────────────┼──────────────┼─────────┼─────────────────┤
-│ KMeans              │ Silhouette   │ 0.228   │ Acceptable      │
-│ (Clustering)        │ Segments     │ 4       │ Actionnables    │
-├─────────────────────┼──────────────┼─────────┼─────────────────┤
-│ Linear Regression   │ R²           │ 0.668   │ Acceptable      │
-│ (Prévision)         │ MAE          │ 864 GBP │ Erreur moyenne  │
-└─────────────────────┴──────────────┴─────────┴─────────────────┘
-```
+## ⚠️ Data Leakage — Problème & Solution
 
-### Applications Métier
+### Symptôme
+AUC initial = **1.00** → perfection irréaliste, signe d'une fuite de données.
 
-✅ **Segmentation** : Identifier les 1 623 VIP pour offres premium  
-✅ **Rétention** : Cibler les 2 100 clients À Risque (52% churn)  
-✅ **Prévision** : Estimer revenus futurs ±864£ par client  
-✅ **Automatisation** : API JSON pour intégration CRM/ERP
+### Cause
+14 features contenaient des informations du futur ou dérivées directement de la cible :
 
-## 🌐 API Flask
+| Feature | Corrélation avec Churn | Raison |
+|---|---|---|
+| `ChurnRiskCategory` | 0.88 | Construite pour prédire le churn |
+| `Recency` | 0.86 | Client parti = Recency élevée |
+| `CustomerType_Perdu` | 0.70 | "Perdu" = churné par définition |
+| `RFMSegment_Dormants` | 0.58 | "Dormant" = inactif |
+| `LoyaltyLevel` | -0.43 | Calculé sur historique récent |
 
-### Endpoints
+### Solution
+Exclusion stricte de 14 features fuyantes via `LEAKY_CHURN_FEATURES` dans `preprocessing.py` :
 
-#### 1. Dashboard Principal
-```
-GET /
-```
-Affiche les métriques de performance des 3 modèles.
-
-#### 2. Formulaire de Prédiction
-```
-GET /predict
-```
-Interface web pour saisir les features d'un client.
-
-#### 3. API JSON - Prédiction
-```
-POST /api/predict
-Content-Type: application/json
-
-{
-  "Frequency": 5,
-  "MonetaryTotal": 1200,
-  "Age": 35,
-  "Gender": "M",
-  "Country": "UK",
-  ...
-}
+```python
+LEAKY_CHURN_FEATURES = [
+    'Recency', 'CustomerTenureDays', 'FirstPurchaseDaysAgo',
+    'TenureRatio', 'MonetaryPerDay',
+    'ChurnRiskCategory', 'LoyaltyLevel', 'SpendingCategory',
+    'CustomerType_Perdu', 'CustomerType_Hyperactif',
+    'CustomerType_Nouveau', 'CustomerType_Occasionnel',
+    'CustomerType_Regulier',
+    'RFMSegment_Champions', 'RFMSegment_Dormants',
+    'RFMSegment_Fideles', 'RFMSegment_Potentiels',
+    'AccountStatus_Closed', 'AccountStatus_Suspended',
+    'AccountStatus_Active', 'AccountStatus_Pending'
+]
 ```
 
-**Réponse :**
-```json
-{
-  "churn": 0,
-  "churn_probability": 0.15,
-  "risk_level": "Faible",
-  "cluster": 1,
-  "cluster_name": "Fidèle",
-  "monetary_prediction": 1850.25,
-  "recommendations": [
-    "Client à faible risque de churn",
-    "Segment Fidèle - Maintenir engagement"
-  ]
-}
+**Résultat :** AUC 1.00 → **0.958** (performances réalistes et généralisables).
+
+---
+
+## 📦 Installation
+
+### Prérequis
+- Python 3.8+
+- pip
+- virtualenv (recommandé)
+
+### Étapes
+
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/votre-username/ml-retail-analysis.git
+cd ml-retail-analysis
+
+# 2. Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate        # Linux / macOS
+venv\Scripts\activate           # Windows
+
+# 3. Installer les dépendances
+pip install -r requirements.txt
+
+# 4. Vérifier l'installation
+python -c "import sklearn; import flask; print('✓ Installation réussie')"
 ```
 
-#### 4. Visualisation des Segments
-```
-GET /segments
-```
-Affiche les profils détaillés des 4 segments clients.
+---
 
-### Exemple cURL
+## 🎮 Utilisation
 
+### Étape 1 — Prétraitement
+
+```bash
+python src/preprocessing.py \
+  --input  data/raw/retail_customers_COMPLETE_CATEGORICAL.csv \
+  --output data/processed/retail_customers_processed.csv
+```
+
+Le pipeline applique 6 étapes :
+1. Suppression des features à variance nulle
+2. Correction des valeurs aberrantes (-1, 99, 999)
+3. Parsing de la date d'inscription → 4 features temporelles
+4. Feature engineering sur IP
+5. Création de features comportementales (`AvgBasketValue`, etc.)
+6. Encodage catégorielles (Ordinal, One-Hot, Target Encoding)
+
+### Étape 2 — Entraînement
+
+```bash
+python src/train_model.py \
+  --data       data/processed/retail_customers_processed.csv \
+  --output-dir models/
+```
+
+Génère les 7 artefacts dans `models/`.
+
+### Étape 3 — Lancer l'application
+
+```bash
+# Développement
+python app/app.py
+
+# Production
+gunicorn -w 4 -b 0.0.0.0:5000 app.app:app
+```
+
+Accédez à : **http://localhost:5000**
+
+---
+
+## 🌐 API REST
+
+### `POST /api/predict`
+
+Prédit churn, segment et valeur monétaire pour un client donné.
+
+**Requête :**
 ```bash
 curl -X POST http://localhost:5000/api/predict \
   -H "Content-Type: application/json" \
@@ -350,7 +324,6 @@ curl -X POST http://localhost:5000/api/predict \
     "MonetaryTotal": 1200,
     "Age": 35,
     "Gender": "M",
-    "Country": "UK",
     "AgeCategory": "35-44",
     "PreferredMonth": 3,
     "FavoriteSeason": "Printemps",
@@ -359,110 +332,115 @@ curl -X POST http://localhost:5000/api/predict \
   }'
 ```
 
-## ⚠️ Data Leakage
-
-### Problème Identifié
-
-**Symptôme initial** : AUC = 1.00 (perfection irréaliste)
-
-### Cause Racine
-
-14 features contenaient des informations du futur ou de la cible :
-
-| Feature | Corrélation | Raison du Leakage |
-|---------|-------------|-------------------|
-| `ChurnRiskCategory` | 0.88 | Construite pour prédire le churn |
-| `Recency` | 0.86 | Client parti = Recency élevée |
-| `CustomerType_Perdu` | 0.70 | "Perdu" = churné par définition |
-| `RFMSegment_Dormants` | 0.58 | "Dormant" = inactif |
-| `LoyaltyLevel` | -0.43 | Calculé sur historique récent |
-| `CustomerTenureDays` | -0.45 | Durée courte = parti |
-
-### Solution Appliquée
-
-**Exclusion de 14 features fuyantes :**
-
-```python
-LEAKY_CHURN_FEATURES = [
-    # Proxies temporels directs
-    'Recency', 'CustomerTenureDays', 'FirstPurchaseDaysAgo',
-    'TenureRatio', 'MonetaryPerDay',
-    
-    # Catégories synthétiques
-    'ChurnRiskCategory', 'LoyaltyLevel', 'SpendingCategory',
-    
-    # One-Hot de CustomerType
-    'CustomerType_Perdu', 'CustomerType_Hyperactif', 
-    'CustomerType_Nouveau', 'CustomerType_Occasionnel', 
-    'CustomerType_Regulier',
-    
-    # One-Hot de RFMSegment
-    'RFMSegment_Champions', 'RFMSegment_Dormants', 
-    'RFMSegment_Fideles', 'RFMSegment_Potentiels',
-    
-    # One-Hot de AccountStatus
-    'AccountStatus_Closed', 'AccountStatus_Suspended',
-    'AccountStatus_Active', 'AccountStatus_Pending'
-]
+**Réponse :**
+```json
+{
+  "churn": 0,
+  "probability": 0.15,
+  "risk": "Faible",
+  "cluster": 1,
+  "cluster_name": "Fidele",
+  "monetary_prediction": 1850.25
+}
 ```
 
-### Résultat Après Correction
+### Autres endpoints
 
-**AUC : 1.00 → 0.958** (performances réalistes et généralisables)
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/` | Dashboard principal |
+| `GET/POST` | `/predict` | Interface de prédiction |
+| `GET` | `/segments` | Profils des 4 segments |
+| `GET` | `/about` | Documentation projet |
+| `POST` | `/run-models` | Relance l'entraînement |
 
-## 🔍 Défis Résolus
+---
 
-### 1. Data Leakage (Churn)
-❌ **Avant** : AUC = 1.00 (14 features fuyantes)  
-✅ **Après** : AUC = 0.958 (exclusion rigoureuse)
+## 📊 Résultats & Performances
 
-### 2. Clustering Trivial
-❌ **Avant** : Silhouette = 0.99 (clusters dominés par outliers)  
-✅ **Après** : Silhouette = 0.228 (winsorisation + log-transform)
+```
+┌─────────────────────┬──────────────┬──────────┬──────────────────────┐
+│ Modèle              │ Métrique     │ Valeur   │ Interprétation       │
+├─────────────────────┼──────────────┼──────────┼──────────────────────┤
+│ Random Forest       │ AUC-ROC      │ 0.958    │ Excellent            │
+│ (Churn)             │ Recall       │ 0.85     │ Détecte 85% des      │
+│                     │              │          │ churners             │
+├─────────────────────┼──────────────┼──────────┼──────────────────────┤
+│ KMeans              │ Silhouette   │ 0.228    │ Acceptable (données  │
+│ (Clustering)        │ Segments     │ 4        │ comportementales)    │
+├─────────────────────┼──────────────┼──────────┼──────────────────────┤
+│ Linear Regression   │ R²           │ 0.668    │ Acceptable           │
+│ (Prévision)         │ MAE          │ 864 £    │ Erreur moyenne       │
+└─────────────────────┴──────────────┴──────────┴──────────────────────┘
+```
 
-### 3. Déséquilibre Classes (Churn)
-❌ **Avant** : 67% Fidèle / 33% Churn  
-✅ **Après** : SMOTE + class_weight='balanced'
+### Défis résolus
 
-### 4. Imputation Sans Fuite
-❌ **Avant** : SimpleImputer avant split train/test  
-✅ **Après** : KNNImputer dans les pipelines
+| Problème | Avant | Après | Solution |
+|---|---|---|---|
+| Data leakage churn | AUC = 1.00 | AUC = 0.958 | Exclusion 14 features fuyantes |
+| Clustering trivial | Silhouette = 0.99 | Silhouette = 0.228 | Winsorisation + log-transform |
+| Déséquilibre classes | 67/33% | Équilibré | SMOTE + class_weight='balanced' |
+| Fuite dans imputation | Avant split | Dans pipeline | KNNImputer intégré au Pipeline |
+
+---
+
+## 💼 Recommandations Métier
+
+### Réduction du Churn
+- Campagnes de rétention ciblant les clients avec ancienneté < 6 mois
+- Offres exclusives avant la saison Automne (feature #1 en importance)
+- Abaisser le seuil de décision de 0.5 → 0.35 pour minimiser les faux négatifs
+
+### Personnalisation Marketing
+- **Segment VIP (8.3% churn)** : programme premium, ventes privées, early access
+- **Segment Fidèle (27.8%)** : campagnes de rétention, cross-selling ciblé
+- **Segment Occasionnel (42.6%)** : promotions saisonnières, réactivation
+- **Segment À Risque (52.1%)** : enquête retours, geste commercial, offre de réengagement
+
+### Optimisation du CA
+- Scorer les clients par potentiel de dépense avant chaque campagne
+- Envisager un modèle XGBoost dédié aux clients avec dépenses élevées (outliers)
+- Collecter des données de navigation et de wishlist pour enrichir les features
+
+---
+
+## 🛠️ Stack Technique
+
+| Catégorie | Technologies |
+|---|---|
+| **ML / Data** | scikit-learn 1.3+, imbalanced-learn, pandas 2.0+, numpy 1.24+ |
+| **Visualisation** | matplotlib, seaborn, plotly, Chart.js |
+| **Déploiement** | Flask 2.3+, joblib, gunicorn |
+| **Frontend** | Bootstrap 5.3, Font Awesome 6.4 |
+| **Dev** | Jupyter, pytest, black |
+
+---
 
 ## 📈 Améliorations Futures
 
-### Court Terme
-- [ ] Hyperparameter tuning avec GridSearchCV
-- [ ] Feature selection automatique (RFE)
+### Court terme
+- [ ] Hyperparameter tuning (GridSearchCV / Optuna)
+- [ ] Feature selection automatique (RFE, SHAP)
 - [ ] Tests unitaires avec pytest
-- [ ] Documentation API avec Swagger
+- [ ] Documentation API avec Swagger / OpenAPI
 
-### Moyen Terme
+### Moyen terme
 - [ ] Déploiement Docker + Kubernetes
-- [ ] Monitoring drift avec Evidently AI
-- [ ] A/B testing des modèles
-- [ ] Dashboard interactif avec Streamlit
+- [ ] Monitoring du data drift (Evidently AI)
+- [ ] Dashboard interactif avec Streamlit ou Dash
+- [ ] A/B testing des modèles en production
 
-### Long Terme
-- [ ] Deep Learning pour séquences temporelles
-- [ ] AutoML avec H2O.ai
-- [ ] MLOps pipeline complet (MLflow)
-- [ ] Prédictions en temps réel (Kafka)
+### Long terme
+- [ ] Deep Learning pour séquences temporelles d'achats
+- [ ] Pipeline MLOps complet (MLflow + DVC)
+- [ ] Prédictions en temps réel (Kafka + streaming)
+- [ ] AutoML (H2O.ai) pour exploration automatique
 
-## 🧪 Tests
+---
 
-```bash
-# Lancer tous les tests
-pytest tests/
+## 👤 Auteur
 
-# Tests avec couverture
-pytest --cov=src tests/
+Projet réalisé dans le cadre du **Module Machine Learning — GI2S1 MolkaChaoui — 2025-2026**
 
-# Tests spécifiques
-pytest tests/test_preprocessing.py -v
-```
-
-## 📝 Documentation
-
-- **Rapport technique complet** : `reports/rapport.pdf`
-- **Notebooks exploratoires** : `notebooks/`
-- **Documentation API** : `http://localhost:5000/api/docs` (après lancement Flask)
+*Analyse Comportementale Clientèle Retail — Atelier Machine Learning*
