@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Segments Clients — Retail ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-users me-2"></i>Segmentation Clients — KMeans k={{ dashboard.clustering.k | default(stats.n_clusters) | default(4) }}</h1>
+        <p>{{ dashboard.clustering.k | default(stats.n_clusters) | default(4) }} segments identifiés par apprentissage non supervisé sur les données comportementales</p>
+    </div>
+</div>
+
+<div class="container pb-4">
+
+    <!-- Métriques clustering -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card p-3">
+                <div class="stat-value">{{ dashboard.clustering.silhouette | default('0.00') | round(4) }}</div>
+                <div class="stat-label">Score Silhouette</div>
+                <small class="text-muted">Ref : > 0.5 = bon</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card p-3" style="border-color:#e74c3c">
+                <div class="stat-value text-danger">1.30</div>
+                <div class="stat-label">Davies-Bouldin</div>
+                <small class="text-muted">Ref : < 1.0 = bon</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card p-3" style="border-color:#2ecc71">
+                <div class="stat-value text-success">692</div>
+                <div class="stat-label">Calinski-Harabasz</div>
+                <small class="text-muted">Plus élevé = mieux</small>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-muted small mb-4">
+        <i class="fas fa-info-circle me-1"></i>
+        Le score Silhouette modéré (0.21) est attendu sur des données comportementales continues
+        où les frontières entre segments ne sont pas nettes. Les clusters restent interprétables métier.
+    </p>
+
+    <!-- Cartes segments -->
+    <div class="row g-4">
+        {% for seg in segments %}
+        <div class="col-md-6">
+            <div class="card segment-card h-100">
+                <div class="segment-header bg-{{ seg.color }}">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas {{ seg.icon }} fa-2x opacity-75"></i>
+                        <div>
+                            <h5 class="mb-0 fw-bold">{{ seg.name }}</h5>
+                            <small class="opacity-75">Cluster {{ seg.id }} &nbsp;|&nbsp; {{ seg.size }} des clients</small>
+                        </div>
+                        <span class="badge bg-white text-{{ seg.color }} ms-auto fw-bold">
+                            Churn {{ seg.churn }}
+                        </span>
+                    </div>
+                </div>
+                <div class="segment-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded small">
+                                <div class="fw-bold text-secondary">Fréquence</div>
+                                {{ seg.frequency }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded small">
+                                <div class="fw-bold text-secondary">Dépenses</div>
+                                {{ seg.monetary }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded small">
+                                <div class="fw-bold text-secondary">Ancienneté</div>
+                                {{ seg.tenure }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded small">
+                                <div class="fw-bold text-secondary">Satisfaction</div>
+                                {{ seg.satisfaction }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-{{ seg.color }} alert-sm py-2 mb-2 small">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        <strong>Action recommandée :</strong> {{ seg.action }}
+                    </div>
+                    <span class="badge bg-{{ seg.color }} bg-opacity-10
+                            text-{{ seg.color }} border border-{{ seg.color }}">
+                        {{ seg.badge }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Taux de churn par segment -->
+    <div class="card mt-4">
+        <div class="card-header fw-bold">
+            <i class="fas fa-chart-bar me-2"></i>Taux de Churn par Segment
+        </div>
+        <div class="card-body">
+            {% set seg_data = [
+                ('C0 Occasionnels',    15,  'warning'),
+                ('C1 VIP / Fidèles',    4,  'success'),
+                ('C2 À Risque',        50,  'danger'),
+                ('C3 Inactifs',       100,  'dark'),
+            ] %}
+            {% for name, pct, color in seg_data %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                    <span>{{ name }}</span>
+                    <span class="text-{{ color }}">{{ pct }}%</span>
+                </div>
+                <div class="progress" style="height: 18px; border-radius: 9px;">
+                    <div class="progress-bar bg-{{ color }}" style="width: {{ pct }}%; border-radius: 9px;">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="d-flex align-items-center mt-2">
+                <div class="flex-grow-1 border-top border-danger border-2" style="border-style: dashed !important;"></div>
+                <span class="mx-2 small text-danger fw-bold">Moyenne globale : 33.3%</span>
+                <div class="flex-grow-1 border-top border-danger border-2" style="border-style: dashed !important;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
